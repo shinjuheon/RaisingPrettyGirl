@@ -1,0 +1,11 @@
+﻿item_name,item_id,sprite_name,item_type,dmg,enforce,attack_speed,accuracy,critical,rarity
+나무 지팡이,1001,NormalWood,0,3,0,0,1,0,0
+달 지팡이,2001,AdvancedMoon,0,6,0,2.25,8,0,1
+별 지팡이,3001,RareStar,0,4,0,2.04,4,0,2
+번개지팡이,4001,HeroThunder,0,25,0,2.5,12,0,3
+천사 지팡이,5001,Legend_Engel,0,35,0,3,15,0,4
+파멸지팡이,6001,Transforma_ruin,0,55,0,3.5,18,0,5
+천상 지팡이,7001,God_Heaven,0,95,0,4,25,0,6
+일반 목걸이,1001,Necklace_Item_1,1,1,0,0,0,0,0
+일반 반지,1001,Ring_Item_1,2,1,0,0,0,0,0
+일반 귀걸이,1001,Earring_Item_1,3,1,0,0,0,0,0

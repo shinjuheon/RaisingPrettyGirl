@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2023bd199935e2544818ae9bc8a98840, type: 3}
+  m_Name: gst4-1225
+  m_EditorClassIdentifier: 
+  _getDiamondCnt: 10000000
+  _getGoldCnt: 0
+  _getScrollCnt: 0
+  items:
+  - ItemID: 7001
+    ItemType: 0
+    Enforce: 12
+  - ItemID: 1001
+    ItemType: 1
+    Enforce: 12
+  - ItemID: 1001
+    ItemType: 2
+    Enforce: 12
+  - ItemID: 1001
+    ItemType: 2
+    Enforce: 12
+  - ItemID: 1001
+    ItemType: 3
+    Enforce: 12
+  - ItemID: 1001
+    ItemType: 3
+    Enforce: 12
+  _pets:
+  - {fileID: 11400000, guid: 70c944776581d1e40a4e1e8bfdc5a359, type: 2}
+  _skinDatas:
+  - {fileID: 11400000, guid: 5b78756e96d2b2a4ca16fa93d5e1865e, type: 2}
+  skills:
+  - Normal
+  - Advanced
+  - Rare
+  - Hero
+  - Legend
+  - Transcendence
+  - God

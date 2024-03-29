@@ -1,0 +1,356 @@
+fileFormatVersion: 2
+guid: 809f8a1867a6caf48958f5bf4d021030
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 12
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Server
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: iPhone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Blizzard_2
+      rect:
+        serializedVersion: 2
+        x: 330
+        y: 407
+        width: 334
+        height: 579
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -32, y: 135.5}
+        - {x: 4, y: 59.5}
+        - {x: 37, y: 6.5}
+        - {x: 68, y: -123.5}
+        - {x: 71, y: -144.5}
+        - {x: 127, y: -259.5}
+        - {x: 122, y: -264.5}
+        - {x: 105, y: -240.5}
+        - {x: 65, y: -185.5}
+        - {x: 30, y: -135.5}
+        - {x: 8, y: -106.5}
+        - {x: -3, y: -96.5}
+        - {x: -65, y: -3.5}
+        - {x: -73, y: 8.5}
+        - {x: -98, y: 97.5}
+        - {x: -150, y: 279.5}
+        - {x: -121, y: 250.5}
+        - {x: -86, y: 188.5}
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b4244bdfe43d52d40a5b768ef565c00d
+      internalID: 1460598556
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blizzard_3
+      rect:
+        serializedVersion: 2
+        x: 601
+        y: 342
+        width: 184
+        height: 635
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 39, y: -315.5}
+        - {x: 10, y: -200.5}
+        - {x: 1, y: -157.5}
+        - {x: -54, y: -45.5}
+        - {x: -76, y: 32.5}
+        - {x: -58, y: 161.5}
+        - {x: -60, y: 262.5}
+        - {x: -30, y: 174.5}
+        - {x: -20, y: 161.5}
+        - {x: 28, y: 39.5}
+        - {x: 57, y: -29.5}
+        - {x: 53, y: -99.5}
+        - {x: 63, y: -121.5}
+        - {x: 56, y: -162.5}
+        - {x: 62, y: -251.5}
+        - {x: 56, y: -311.5}
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7002bcc6562510a45b3f51696f976533
+      internalID: 400442757
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blizzard_4
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 82
+        width: 377
+        height: 423
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -41.397064, y: 107.59262}
+        - {x: 71.43634, y: -8.984283}
+        - {x: 115.04068, y: -104.61052}
+        - {x: 182.45679, y: -203.14793}
+        - {x: 173.22662, y: -210.08968}
+        - {x: 116.36395, y: -162.62436}
+        - {x: 17.09253, y: -51.242615}
+        - {x: -25.596191, y: -7.939392}
+        - {x: -71.45035, y: 60.622498}
+        - {x: -128.79556, y: 97.24094}
+        - {x: -187.68243, y: 206.66061}
+        - {x: -166.23022, y: 192.09384}
+        - {x: -130.89812, y: 160.7768}
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fbee9741c28b9cf4da0244fb5bd55deb
+      internalID: 1729069515
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blizzard_5
+      rect:
+        serializedVersion: 2
+        x: 181
+        y: 183
+        width: 482
+        height: 661
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 201, y: -330.5}
+        - {x: 131, y: -245.5}
+        - {x: 4, y: -94.5}
+        - {x: -27, y: -31.5}
+        - {x: -38, y: -25.5}
+        - {x: -109, y: 97.5}
+        - {x: -161, y: 190.5}
+        - {x: -193, y: 298.5}
+        - {x: -178, y: 288.5}
+        - {x: -141, y: 219.5}
+        - {x: -97, y: 155.5}
+        - {x: -74, y: 133.5}
+        - {x: -42, y: 79.5}
+        - {x: -16, y: 62.5}
+        - {x: 65, y: -26.5}
+        - {x: 82, y: -39.5}
+        - {x: 97, y: -99.5}
+        - {x: 167, y: -243.5}
+        - {x: 213, y: -318.5}
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 370ec83c116594b48b678445cfd2b629
+      internalID: 1647267362
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Blizzard_7
+      rect:
+        serializedVersion: 2
+        x: 784
+        y: 193
+        width: 122
+        height: 555
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 28, y: -274.5}
+        - {x: 15, y: -234.5}
+        - {x: 4, y: -159.5}
+        - {x: -11, y: -63.5}
+        - {x: -18, y: -10.5}
+        - {x: -20, y: 48.5}
+        - {x: -20, y: 92.5}
+        - {x: -43, y: 153.5}
+        - {x: -28, y: 277.5}
+        - {x: -19, y: 265.5}
+        - {x: -16, y: 233.5}
+        - {x: 2, y: 180.5}
+        - {x: 19, y: 141.5}
+        - {x: 28, y: 129.5}
+        - {x: 30, y: 119.5}
+        - {x: 37, y: 112.5}
+        - {x: 47, y: 20.5}
+        - {x: 59, y: -56.5}
+        - {x: 53, y: -141.5}
+        - {x: 42, y: -162.5}
+        - {x: 40, y: -221.5}
+        - {x: 34, y: -227.5}
+        - {x: 39, y: -273.5}
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 78cd4b722de8c4646a20c1eb5a8bcfd3
+      internalID: -604297572
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    nameFileIdTable:
+      Blizzard_0: 1902861941
+      Blizzard_1: 775117985
+      Blizzard_2: 1460598556
+      Blizzard_3: 400442757
+      Blizzard_4: 1729069515
+      Blizzard_5: 1647267362
+      Blizzard_6: 2081042065
+      Blizzard_7: -604297572
+      Blizzard_8: -1405415050
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
