@@ -1,0 +1,5 @@
+﻿item_name,item_id,sprite_name,item_type,dmg,enforce,attack_speed,accuracy,critical
+노말_나무_지팡이,0,NormalWood,0,3,0,0,1,0
+희귀_별_지팡이,1,RareStar,0,4,0,2.04,4,0
+고급_달_지팡이,2,AdvancedMoon,0,6,0,2.25,8,0
+영웅_번개_지팡이,3,HeroThunder,0,25,0,2.5,12,0
