@@ -30,9 +30,9 @@ namespace gunggme
           if (_maintenceUI.activeSelf) return;
           if (_loging.activeSelf) return;
           _loging.SetActive(true);
-          
-          PlayGamesPlatform.Instance.Authenticate(ProcessAuthentication);
-          
+#if UNITY_ANDROID
+            PlayGamesPlatform.Instance.Authenticate(ProcessAuthentication);
+#endif
         }
 
         public void MoveScene()
@@ -51,7 +51,9 @@ namespace gunggme
           // Continue with Play Games Services
         } else {
           LoginFailed();
+#if UNITY_ANDROID
           PlayGamesPlatform.Instance.ManuallyAuthenticate(ProcessAuthentication);
+#endif
         }
       }
 
@@ -68,7 +70,8 @@ namespace gunggme
 
       public void GetAccessCode()
       {
-        PlayGamesPlatform.Instance.RequestServerSideAccess(
+#if UNITY_ANDROID
+            PlayGamesPlatform.Instance.RequestServerSideAccess(
           /* forceRefreshToken= */ false,
           code => {
             Debug.Log("구글 인증 코드 : " + code);
@@ -131,6 +134,7 @@ namespace gunggme
               });
             });
           });
+#endif
       }
 
       IEnumerator GetUserInfo()
