@@ -610,7 +610,12 @@ namespace gunggme
                 Backend.AsyncPoll();
             }
         }
-
+        // 1. InitData가 호출된 후 게임이 시작되어야 하는데 그게 호출안되는 상황이 발생한다.
+        // 2. 로그인했을때 예외상황 살펴보기
+        // 3. 구글계정 - 메일 - 크래시에 대한 설명 - 크롬 브라우저 -> 계정 여러개 띄울 수 있다. -> 메일 확인
+        // 로그인
+        // 패키지명
+        // 
         public void InitData()
         {
             ItemSaveData = new ItemSaveClass();
@@ -624,6 +629,7 @@ namespace gunggme
             Backend.PlayerData.InsertData("StageCoupon", StageCoupon.ToParam());
             SkillData = new SkillData();
             Backend.PlayerData.InsertData("SkillData", SkillData.ToParam());
+            Debug.Log("InitDataSucess");
             StartCoroutine(LoadDataInit("NameSetScene"));
         }
 

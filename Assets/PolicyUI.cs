@@ -12,6 +12,12 @@ public class PolicyUI : MonoBehaviour
     private void Awake()
     {
         _loginManager = FindObjectOfType<LoginManager>();
+
+        // LoginManager를 찾지 못한 경우 예외 처리
+        if (_loginManager == null)
+        {
+            Debug.LogError("LoginManager를 찾을 수 없습니다.");
+        }
     }
 
     public void OpenUI()
@@ -26,9 +32,18 @@ public class PolicyUI : MonoBehaviour
 
     public void DeAccept()
     {
-        _loginManager.LoginFailed();
-        Backend.BMember.Logout();
         
+        if (_loginManager != null)
+        {
+            _loginManager.LoginFailed();
+        }
+        else
+        {
+            Debug.LogWarning("_loginManager가 null입니다.");
+        }
+
+        Backend.BMember.Logout();
+
         //즉시 탈퇴
     }
 }
