@@ -21,6 +21,11 @@ namespace gunggme
         private void Awake()
         {
             _loginManager = GetComponent<LoginManager>();
+
+            if (_loginManager == null)
+            {
+                Debug.LogWarning("LoginManager 컴포넌트를 찾지 못했습니다.");
+            }
         }
 
         private void Start()
