@@ -600,6 +600,7 @@ namespace gunggme
         protected override void Awake()
         {
             base.Awake();
+            Debug.Log("SaveManager Awake() called");
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
         }
 
@@ -615,7 +616,7 @@ namespace gunggme
         // 3. 구글계정 - 메일 - 크래시에 대한 설명 - 크롬 브라우저 -> 계정 여러개 띄울 수 있다. -> 메일 확인
         // 로그인
         // 패키지명
-        // 
+        //
         public void InitData()
         {
             ItemSaveData = new ItemSaveClass();
@@ -1356,5 +1357,12 @@ namespace gunggme
             {
                 return ItemDataManager.Instance.GetItem(id, type, enforce);
             }
+        
+        
+        private void OnApplicationQuit()
+        {
+            UpdateData();
+            Debug.Log("데이터 저장 완료");
         }
     }
+ }

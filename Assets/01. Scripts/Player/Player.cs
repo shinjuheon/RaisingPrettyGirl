@@ -76,6 +76,7 @@ namespace gunggme
         private void Start()
         {
             ChangeState(PlayerState.Move);
+            SoundManager.Instance.PlaySound(SoundType.BackgroundMusic, 1); // 배경음 변경
         }
 
         public void ChangeWeaponSprite(Sprite weaponSprite)

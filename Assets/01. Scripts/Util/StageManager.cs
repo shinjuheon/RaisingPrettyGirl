@@ -26,23 +26,26 @@ namespace gunggme
             _monsterManager = GameObject.FindObjectOfType<MonsterManager>();
             _uiManager = FindObjectOfType<UIManager>();
             
-            SetStage(SaveManager.Instance.StageCoupon.CurStage);
-            _maximumStage = SaveManager.Instance.StageCoupon.MaxStage;
+            SetStage(SaveManager.Instance.StageCoupon.CurStage); // 서버에 저장된 CurStage를 넣어준다. // 맥스스테이지와 관계없이 진행하던 스테이지를 표시해준다.
+            Debug.Log(SaveManager.Instance.StageCoupon.CurStage);
+
+            _maximumStage = SaveManager.Instance.StageCoupon.MaxStage; // 최고로 달성한 스테이지
+
             _uiManager.SetStageText(_currentStage, _currentFloor);
         }
 
         // 클리어 조건 체크
         void CheckClearCondition()
         {
-            if (_currentFloor > 100 )
-            {
+            if (_currentFloor > 100) // 스테이지 마지막은 100(드래곤) 꺠면 Player스크립트의 void FindEnemy()함수가 실행되고 FindEnemy()함수에 
+            {                        // CheckClearCondition()함수가 실행된다. 
                 if (IsUpside)
                 {
                     _currentStage++;
                     _currentFloor = 1;
                     SaveManager.Instance.StageCoupon.CurFloor = 1;
                     _currentClearFloor = 0;
-                    if (_currentFloor >= SaveManager.Instance.StageCoupon.MaxStage)
+                    if (_currentStage >= SaveManager.Instance.StageCoupon.MaxStage)
                     {
                         SaveManager.Instance.StageCoupon.MaxStage++;
                         _maximumStage = SaveManager.Instance.StageCoupon.MaxStage;
@@ -57,7 +60,7 @@ namespace gunggme
             }
         }
 
-        public void SetStage(int stage)
+        public void SetStage(int stage) // SaveManager.Instance.StageCoupon.CurStage 값이 들어옴
         {
             _currentStage = stage;
             _currentFloor = SaveManager.Instance.StageCoupon.CurFloor;

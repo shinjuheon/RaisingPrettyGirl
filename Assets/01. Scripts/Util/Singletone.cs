@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace gunggme
 {
-    public class Singletone<T> : MonoBehaviour where T : MonoBehaviour 
+    public class Singletone<T> : MonoBehaviour where T : MonoBehaviour
     {
         private static T _instance;
 
@@ -12,10 +12,10 @@ namespace gunggme
         {
             get
             {
-                if(_instance == null)
+                if (_instance == null)
                 {
                     _instance = FindObjectOfType(typeof(T)) as T;
-                    if(_instance == null)
+                    if (_instance == null)
                     {
                         Debug.Log($"현재 씬에서 {typeof(T)} 가 존재하지 않습니다.");
                     }
@@ -26,12 +26,12 @@ namespace gunggme
 
         protected virtual void Awake()
         {
-            if(_instance == null)
+            if (_instance == null)
             {
                 this.CreateThisInstance();
                 DontDestroyOnLoad(gameObject);
             }
-            else if(_instance != null)
+            else if (_instance != null)
             {
                 Debug.Log("현재 instance가 중복됩니다.\n" + _instance.name);
                 Destroy(gameObject);
@@ -44,3 +44,4 @@ namespace gunggme
         }
     }
 }
+
