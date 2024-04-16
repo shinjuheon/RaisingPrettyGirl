@@ -59,7 +59,7 @@ public class SkillSystem : MonoBehaviour
         _monsterManager = GameObject.Find("MonsterManager").GetComponent<MonsterManager>();
         _player = GameObject.Find("Player").GetComponent<Player>();
         _sliderList = GameObject.Find("Skills").GetComponentsInChildren<Slider>().ToList();
-        
+
 #if UNITY_EDITOR
         _haveSkillList = new List<string> {"Normal", "Advanced", "Rare", "Hero", "Legend", "Transcendence", "God"};
 #else
@@ -132,7 +132,8 @@ public class SkillSystem : MonoBehaviour
 
         switch (skillNum)
         {
-            case 0: // Common
+            case 0: // Common(일반스킬)
+                SoundManager.Instance.PlaySound(SoundType.VFX, 1);
                 Transform targetTrans = _player._nearEnem ? _player._nearEnem.transform : _bulletBorderRight;
                 temp = PoolManager.Instance.Get(0);
                 temp.GetComponent<Bullet>().SetTarget(targetTrans, Mathf.RoundToInt(_player._playerStat.Dmg * 1.05f), Vector2.one * 0.7f);
@@ -140,19 +141,22 @@ public class SkillSystem : MonoBehaviour
                 temp.transform.position = _player._firePos.position;
                 break;
             
-            case 1: // Advanced
+            case 1: // Advanced(파이어볼)
+                SoundManager.Instance.PlaySound(SoundType.VFX, 2);
                 temp = PoolManager.Instance.Get(6);
                 temp.GetComponent<Bullet>().SetTarget(_bulletBorderRight, Mathf.RoundToInt(_player._playerStat.Dmg * 1.1f));
                 temp.transform.position = _player._firePos.position;
                 break;
             
             case 2: // Rare
+                
                 _monsterManager.RemainEnemy[0].GetComponent<Enemy>().SetStunTime();
                 break;
             
-            case 3: // Hero
+            case 3: // Hero(블리자드)
                 // StartCoroutine(PoolManager.Instance.Get(6).GetComponent<BlizzardSkill>().DoSkill(_monsterManager,
                 //     Mathf.RoundToInt(_player._playerStat.Dmg * 1.3f)));
+                SoundManager.Instance.PlaySound(SoundType.VFX, 3);
                 StartCoroutine(_blizzardContainer.DoSkill(_monsterManager,
                     Mathf.RoundToInt(_player._playerStat.Dmg * 1.3f)));
                 break;
@@ -173,8 +177,9 @@ public class SkillSystem : MonoBehaviour
                 temp.transform.position = _meteorStartList[1];
                 break;
             
-            case 6: // God
+            case 6: // God(무적)
                 // 대미지 10배 증가는 PlayerStat.Dmg에 있음
+                SoundManager.Instance.PlaySound(SoundType.VFX, 4);
                 _player.SetGodModTime();
                 break;
         }

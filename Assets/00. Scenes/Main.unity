@@ -2837,9 +2837,13 @@ MonoBehaviour:
   audioMixer: {fileID: 24100000, guid: b646db150c6f1684b9d7a8671278761a, type: 2}
   vfxClips:
   - {fileID: 8300000, guid: fd25a15f9797641458336cccfb445343, type: 3}
+  - {fileID: 8300000, guid: dc51728bce0e5c84384aba7dd5b66158, type: 3}
+  - {fileID: 8300000, guid: e780b9b220ec15d47944c93580822665, type: 3}
+  - {fileID: 8300000, guid: 7e0da2a815a5bfa4286671b0b6b6b27c, type: 3}
+  - {fileID: 8300000, guid: 831febc95b4609545a7c5af450f39247, type: 3}
   backgroundMusicClips:
-  - {fileID: 8300000, guid: 58004460905c249419023b1b11592c76, type: 3}
-  - {fileID: 8300000, guid: 87263bb8f5309ad4d9c857457918effe, type: 3}
+  - {fileID: 8300000, guid: 1188c31399ed5644caec54992f7b7a69, type: 3}
+  - {fileID: 8300000, guid: 43fcced8e39eae54db972fe4865613b9, type: 3}
 --- !u!4 &1633638022
 Transform:
   m_ObjectHideFlags: 0

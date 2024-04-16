@@ -63,7 +63,7 @@ namespace gunggme
                     }
                     break;
             }
-        
+            
             // 클립이 존재하고 오디오 소스가 지정되었을 경우 재생
             if (clip != null && audioSource != null && soundType == SoundType.BackgroundMusic)
             {
