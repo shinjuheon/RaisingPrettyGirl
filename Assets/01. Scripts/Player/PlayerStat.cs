@@ -23,6 +23,7 @@ namespace gunggme
         [SerializeField] private int _magicDef;
         [SerializeField] private int _hp;
 
+
         [Header("Components")]
         private PlayerEquipment _playerEquipment;
         private PetSystem _petSystem;
@@ -32,7 +33,7 @@ namespace gunggme
         public float CurEXP => _curEXP;
         public float MaxEXP => _maxEXP;
         public int Level => _level;
-        public int StatPoint => _statPoint;
+        
         public float Cri => _playerEquipment.GetCriV();
         
         // Stat
@@ -40,6 +41,10 @@ namespace gunggme
         public int DmgLevel => _dmg;
         
         public int Dex => _dex;
+
+        public int Combat = 0;
+        
+        public int StatPoint => _statPoint;
 
         public int MagicDef
         {
@@ -102,8 +107,14 @@ namespace gunggme
                 SaveManager.Instance.LevelStatData.SP, SaveManager.Instance.LevelStatData.Dmg,
                 SaveManager.Instance.LevelStatData.Dex, SaveManager.Instance.LevelStatData.MDef,
                 SaveManager.Instance.LevelStatData.HP);
+            Combat = Dex + MagicDef + Hp + Dmg;
             _player.SetHP();
             UpLevel(0);
+        }
+
+        public void UpdateCombat()
+        {
+            Combat = Dex + MagicDef + Hp + Dmg;
         }
 
         public bool UpLevel(float exp)

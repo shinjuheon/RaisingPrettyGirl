@@ -213,7 +213,7 @@ namespace gunggme
         //    yield return new WaitUntil(() => isHaveName);
         //}
 
-        IEnumerator ForceQuitGame()
+        public IEnumerator ForceQuitGame()
         {
             gameQuitUI.SetActive(true);
             yield return new WaitForSeconds(2.5f);

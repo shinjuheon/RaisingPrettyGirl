@@ -7,6 +7,7 @@ using JetBrains.Annotations;
 using LitJson;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Newtonsoft.Json.Linq;
 
 namespace gunggme
 {
@@ -361,6 +362,7 @@ namespace gunggme
         public int Dex;
         public int MDef;
         public int HP;
+        public int Combat;
 
         public PlayerLevelStatData()
         {
@@ -371,9 +373,10 @@ namespace gunggme
             Dex = 0;
             MDef = 0;
             HP = 0;
+            Combat = 0;
         }
 
-        public PlayerLevelStatData(int level, float exp, int point, int dmg, int dex, int mdef, int hp)
+        public PlayerLevelStatData(int level, float exp, int point, int dmg, int dex, int mdef, int hp, int comb)
         {
             CurLv = level;
             CurEXP = exp;
@@ -382,20 +385,43 @@ namespace gunggme
             Dex = dex;
             MDef = mdef;
             HP = hp;
+            Combat = comb;
         }
 
         public PlayerLevelStatData(LitJson.JsonData json)
         {
+            //.Log($"PlayerLevelStatData JsonData : {json}");
             CurLv = int.Parse(json["CLv"].ToString());
+            //Debug.Log($"PlayerLevelStatData CurLv : {CurLv}");
+
             CurEXP = float.Parse(json["CEXP"].ToString());
+            //Debug.Log($"PlayerLevelStatData CurEXP : {CurEXP}");
+
             SP = int.Parse(json["SP"].ToString());
+            //Debug.Log($"PlayerLevelStatData SP : {SP}");
+
             Dmg = int.Parse(json["Dmg"].ToString());
+            //Debug.Log($"PlayerLevelStatData Dmg : {Dmg}");
+
             Dex = int.Parse(json["Dex"].ToString());
+            //Debug.Log($"PlayerLevelStatData Dex : {Dex}");
+
             MDef = int.Parse(json["MDef"].ToString());
+            //Debug.Log($"PlayerLevelStatData MDef : {MDef}");
+
             HP = int.Parse(json["HP"].ToString());
+            //Debug.Log($"PlayerLevelStatData HP : {HP}");
+            if (json.Keys.Contains("Combat"))
+            {
+                Combat = int.Parse(json["Combat"].ToString());
+            }
+            else
+            {
+                Combat = 0;
+            }
         }
 
-        public Param ToParam(int level, float exp, int point, int dmg, int dex, int mdef, int hp)
+        public Param ToParam(int level, float exp, int point, int dmg, int dex, int mdef, int hp, int comp)
         {
             Param param = new Param();
             if (level != CurLv)
@@ -440,6 +466,12 @@ namespace gunggme
                 param.Add("HP", HP);
             }
 
+            if (Combat != comp)
+            {
+                Combat = comp;
+                param.Add("Combat", Combat);
+            }
+
             return param;
         }
 
@@ -453,6 +485,7 @@ namespace gunggme
             param.Add("Dex", Dex);
             param.Add("MDef", MDef);
             param.Add("HP", HP);
+            param.Add("Combat", Combat);
             return param;
         }
     }
@@ -584,6 +617,12 @@ namespace gunggme
         private CodeSystem _codeSystem;
         private UIManager _uiManager;
         private Player _player;
+        public GameObject userDataLoadfail_Text;
+        private bool loadingComplete = false;
+
+
+        private string combatRowInData;
+
 
         // skinData
         public List<Skin> haveSkins; // skins[등급][번호]
@@ -604,6 +643,14 @@ namespace gunggme
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
         }
 
+        //private void Start()
+        //{
+        //    if (SceneManager.GetActiveScene().buildIndex == 1)
+        //    {
+        //        UpdateData();
+        //    }
+        //}
+
         void Update()
         {
             if (Backend.IsInitialized)
@@ -617,6 +664,75 @@ namespace gunggme
         // 로그인
         // 패키지명
         //
+        //public void CombatDataInsert()
+        //{
+        //    // To Do : APK에서 테스트할떄는 뒤끝서버에 Combat변수가 올라가지만, APK를 지우고 라이브서버에서 플레이할때는
+        //    // Combat변수가 올라간 상태로 플레이하기떄문에 LoadData -> GetLevelStatData함수를 통과할 수 없다.
+        //    // 그래서 예외처리가 필요하다. -> 1. 어떻게 예외처리할지 알아볼것
+        //    // 2. 뒤끝서버가 점검중일경우 BackEnd bor.Success쪽에 예외처리를 띄어줘야한다. (완)
+        //    // 3. Loaddata()함수의 Wait For Until()을 2분동안 통과하지 못할경우의 예외처리 (완)
+        //    Debug.Log("CombatDataInsert()시작");
+        //    Backend.GameData.Get("PlayerLevelStatData", new Where(), 10, bro =>
+        //    {
+        //        if (!bro.IsSuccess())
+        //        {
+        //            Debug.LogError($"데이터 조회 실패: {bro.GetErrorCode()}");
+        //            return;
+        //        }
+
+        //        var rows = bro.GetReturnValuetoJSON()["rows"];
+        //        if (rows.Count <= 0)
+        //        {
+        //            Debug.Log("데이터가 존재하지 않습니다.");
+        //            return;
+        //        }
+
+        //        var combatValue = bro.FlattenRows()[0].ContainsKey("Combat") ? bro.FlattenRows()[0]["Combat"] : null;
+                
+        //        //Debug.Log($"CombatDataInsert combatValue : {combatValue}");
+
+        //        if (combatValue == null || combatValue.ToString() == string.Empty)
+        //        {
+        //            Debug.Log($"combatValue == null || combatValue.ToString() == string.Empty");
+
+        //            Param param = new Param();
+
+        //            param.Add("Combat", LevelStatData.Combat);
+
+        //            Debug.Log("$Combat 데이터 삽입완료");
+        //            //UpdateData();
+        //            //Debug.Log($"Combatvalue 2 : {combatValue}");
+
+        //            //Backend.GameData.Insert("PlayerLevelStatData", param, callback =>
+        //            //{
+        //            //    Debug.Log($"PlayerLevelStatData안에 Combat Insert 시작");
+        //            //    if (callback.IsSuccess())
+        //            //    {
+        //            //        Debug.Log("Combat 데이터 삽입 시작");
+                            
+        //            //        combatRowInData = callback.GetInDate(); // combatRowInData를 InData()로 사용하면 될듯.
+        //            //        Debug.Log($"First CombatRowInData : {combatRowInData}");
+
+        //            //        UpdateData();
+
+        //            //        Debug.Log($"Second CombatRowInData : {combatRowInData}");
+
+        //            //        Debug.Log("데이터 삽입 성공");
+        //            //    }
+        //            //    else
+        //            //    {
+        //            //        Debug.LogError($"데이터 삽입 실패: {callback.GetErrorCode()}");
+        //            //    }
+        //            //});
+        //        }
+        //        else
+        //        {
+        //            Debug.Log("PlayerLevelStatData테이블에 Combat데이터가 이미 존재합니다.");
+        //            return;
+        //        }
+        //    });
+        //}
+
         public void InitData()
         {
             ItemSaveData = new ItemSaveClass();
@@ -624,8 +740,8 @@ namespace gunggme
             Backend.PlayerData.InsertData("InventoryData", invenParam);
             ETCData = new SkinPetGoodsData();
             Backend.PlayerData.InsertData("SkinPetGoods", ETCData.ToParam());
-            LevelStatData = new PlayerLevelStatData();
-            Backend.PlayerData.InsertData("PlayerLevelStatData", LevelStatData.ToParam());
+            LevelStatData = new PlayerLevelStatData(); // 생성자를 만들고
+            Backend.PlayerData.InsertData("PlayerLevelStatData", LevelStatData.ToParam()); // PlayerLevelStatData테이블 내에 Insert ToParam()
             StageCoupon = new StageCouponData();
             Backend.PlayerData.InsertData("StageCoupon", StageCoupon.ToParam());
             SkillData = new SkillData();
@@ -665,6 +781,7 @@ namespace gunggme
             int saveNum = 0;
             FindComponents();
             Debug.Log("저장 시작");
+            _playerStat.UpdateCombat();
             ItemSaveData.SetItem(_inventory);
             ItemSaveData.SetEquipData(_playerEquipment);
 
@@ -672,7 +789,7 @@ namespace gunggme
                 _goodsManager.DiaCnt, _goodsManager.ScrollCnt);
             Param skinParam = ETCData.ToParam();
             LevelStatData = new PlayerLevelStatData(_playerStat.Level, _playerStat.CurEXP, _playerStat.StatPoint,
-                _playerStat.DmgLevel, _playerStat.Dex, _playerStat.MDefLevel, _playerStat.HPLv);
+                _playerStat.DmgLevel, _playerStat.Dex, _playerStat.MDefLevel, _playerStat.HPLv, _playerStat.Combat);
             Param levelParam = LevelStatData.ToParam();
             StageCoupon = new StageCouponData(_codeSystem.UsedCode, _stageManager.MaximumStage,
                 _stageManager.CurrentStage, _stageManager.CurrentFloor);
@@ -712,7 +829,6 @@ namespace gunggme
                     Debug.LogError("레벨 스탯 갱신 실패");
                     return;
                 }
-
                 saveNum++;
                 _playerLevelStatDataIndate = callback.GetInDate();
                 Debug.Log("저장 완료");
@@ -751,6 +867,7 @@ namespace gunggme
             int saveNum = 0;
             FindComponents();
             Debug.Log("저장 시작");
+            _playerStat.UpdateCombat();
             ItemSaveData.SetItem(_inventory);
             ItemSaveData.SetEquipData(_playerEquipment);
 
@@ -758,7 +875,7 @@ namespace gunggme
                 _goodsManager.DiaCnt, _goodsManager.ScrollCnt);
             Param skinParam = ETCData.ToParam();
             LevelStatData = new PlayerLevelStatData(_playerStat.Level, _playerStat.CurEXP, _playerStat.StatPoint,
-                _playerStat.DmgLevel, _playerStat.Dex, _playerStat.MDefLevel, _playerStat.HPLv);
+                _playerStat.DmgLevel, _playerStat.Dex, _playerStat.MDefLevel, _playerStat.HPLv, _playerStat.Combat);
             Param levelParam = LevelStatData.ToParam();
             StageCoupon = new StageCouponData(_codeSystem.UsedCode, _stageManager.MaximumStage,
                 _stageManager.CurrentStage, _stageManager.CurrentFloor);
@@ -841,7 +958,6 @@ namespace gunggme
             Debug.Log(saveNum + " 저장");
         }
 
-
         public IEnumerator LoadData(string sceneName)
         {
             bool invenLoad = false;
@@ -851,47 +967,101 @@ namespace gunggme
             bool userInfoLoads = false;
             bool skillDataLoads = false;
 
+            StartCoroutine(TrackLoadingTime());
+
+            //CombatDataInsert();
+
             try
             {
                 GetLevelStatData("", () =>
                 {
+                    Debug.Log($"GetLevelStatData callback is called");
                     levelStatLoad = true;
+                    
                 });
                 GetInvenData("", () =>
                 {
+                    Debug.Log($"GetInvenData callback is called");
                     invenLoad = true;
+
                 });
+
+                Debug.Log($"LoadData 1");
+                
+
                 GetGoodsSkinPetData("", () =>
                 {
+                    Debug.Log($"GetGoodsSkinPetData callback is called");
                     goodsLoads = true;
                 });
+
+                Debug.Log($"LoadData 2");
+
                 GetStageCoupon("", () =>
                 {
+                    Debug.Log($"GetStageCoupon callback is called");
                     stageLoads = true;
                 });
+
+                Debug.Log($"LoadData 3");
+
                 GetUserInfo(() =>
                 {
+                    Debug.Log($"GetUserInfo callback is called");
                     userInfoLoads = true;
                     if (string.IsNullOrEmpty(_userInfo.nickname))
                     {
                         sceneName = "NameSetScene";
                     }
                 });
-                
+
+                Debug.Log($"LoadData 4");
+
                 GetSkillData("", () =>
                 {
+                    Debug.Log($"GetSkillData callback is called");
                     skillDataLoads = true;
                 });
+
+                Debug.Log($"LoadData 5");
+
             }
             catch (Exception e)
             {
                 Debug.LogError(e);
             }
 
+
+            Debug.Log($"before WaitUntil 스텟데이터 :{levelStatLoad}");
+
             yield return new WaitUntil(() => invenLoad && levelStatLoad && goodsLoads && stageLoads && userInfoLoads && skillDataLoads);
+
+            loadingComplete = true;
+
+            Debug.Log($"after WaitUntil 스텟데이터 :{levelStatLoad}");
 
             Debug.Log($"모든 데이터 불러오기 성공, {sceneName} 이동");
             SceneManager.LoadScene(sceneName);
+        }
+
+        IEnumerator TrackLoadingTime()
+        {
+            float userDataLoadDelayTime = 0;
+
+            while (userDataLoadDelayTime < 120.0f)
+            {
+                if (loadingComplete)  // 로딩 완료 플래그 검사
+                {
+                    yield break;  // 로딩이 완료되면 코루틴 종료
+                }
+                yield return null;
+                userDataLoadDelayTime += Time.deltaTime;
+            }
+
+            // 120초가 지나면 로딩 실패 메시지 표시 및 게임 종료
+            userDataLoadfail_Text.SetActive(true);
+            yield return new WaitForSeconds(2.5f);
+            Application.Quit();
         }
 
         public IEnumerator LoadDataInit(string sceneName)
@@ -909,6 +1079,7 @@ namespace gunggme
             {
                 Backend.PlayerData.GetMyData("InventoryData", 10, callback =>
                 {
+                    Debug.Log($"GetInvendata GetMydataCallback : {callback}");
                     if (!callback.IsSuccess())
                     {
                         Debug.LogError(callback.GetErrorCode());
@@ -1069,25 +1240,129 @@ namespace gunggme
                         FindObjectOfType<LoginManager>().LoginFailed();
                         return;
                     }
+                    
+                    //Debug.Log($"GetLevelStatData 스텟데이터 불러오기 시작 callback.HasFirstKey() : {callback.HasFirstKey()}");
 
-                    Debug.Log("불러오기 시작");
-
-                    if (callback.HasFirstKey())
-                    {
+                    if (callback.HasFirstKey()) // 가져와야할 데이터가 100개가 넘어갈시callback.HasFirstKey() = true
+                    {                           // true일시 Backend.PlayerData.GetMyData("PlayerLevelStatData", 10, firstkey, callback =>로 간다.
+                                                // 즉 가져와야할 데이터가 100개가 넘어가지 않으면 실행되지 않는다.
+                        Debug.Log($"HasFirstKey Action() : {callback.HasFirstKey()}");
                         GetLevelStatData(callback.FirstKeystring(), call);
                     }
                     else
                     {
-                        _playerLevelStatDataIndate = callback.GetInDate();
-                        Debug.Log(callback.FlattenRows()[0]);
+                        // 이 부분에서 데이터 처리
+                        _playerLevelStatDataIndate = callback.GetInDate(); // PlayerLevelStatData테이블의 InData
+                        Debug.Log($"_playerLevelStatDataIndate : {_playerLevelStatDataIndate}");
                         try
                         {
+                            //var flattenRows = callback.FlattenRows();
+
+                            //JArray jsonArray = JArray.Parse(flattenRows.ToJson());
+
+                            //JObject firstElement = (JObject)jsonArray[0];
+
+                            //if (firstElement["Combat"] != null)
+                            //{
                             LevelStatData = new PlayerLevelStatData(callback.FlattenRows()[0]);
-                            Debug.Log(
-                                $"{SaveManager.Instance.LevelStatData.CurLv} {SaveManager.Instance.LevelStatData.CurEXP}" +
-                                $"{SaveManager.Instance.LevelStatData.SP} {SaveManager.Instance.LevelStatData.Dmg} {SaveManager.Instance.LevelStatData.Dex}" +
-                                $"{SaveManager.Instance.LevelStatData.MDef} {SaveManager.Instance.LevelStatData.HP} ");
-                            Debug.Log("불러오기 성공");
+                            //}
+                            //else
+                            //{
+
+                            //}
+                            //LevelStatData = new PlayerLevelStatData(callback.FlattenRows()[0]);
+                            Param levelParam = LevelStatData.ToParam();
+
+                            // 생성자를 호출하고
+                            // Param을 넣어준다.
+                            // PlayerLevelStatData(callback.FlattenRows()[0]);은 매개변수가 LitJson이다. LitJson은 백엔드에서 값을 가져올떄 LitJson값을 받는다.
+                            // 고로 백엔드에 Combat의 값이 존재해야한다
+
+                            Backend.PlayerData.UpdateMyLatestData("PlayerLevelStatData", levelParam, callback =>
+                            {
+                                if (!callback.IsSuccess())
+                                {
+                                    Debug.LogError("레벨 스탯 갱신 실패");
+                                    return;
+                                }
+                                _playerLevelStatDataIndate = callback.GetInDate();
+                                Debug.Log("저장 완료");
+                            });
+                            // Updatedata
+
+                            //if (flattenRows != null && flattenRows.Count > 0 && flattenRows[0] != null)
+                            //{
+                            //    var firstRow = flattenRows[0]; // 첫 번째 행 가져오기
+
+                            //    // "Combat" 키가 존재하지 않으면 추가
+                            //    if (!firstRow.ContainsKey("Combat"))
+                            //    {
+                            //        Debug.Log($"flattenRows[0]에 Combat 키가 존재하지 않습니다.");
+                            //        Param param = new Param();
+                            //        param.Add("Combat", LevelStatData.Combat);
+                            //        Backend.PlayerData.UpdateMyLatestData("PlayerLevelStatData", param, (callback) =>
+                            //        {
+                            //            // 이후 처리
+                            //        });
+                            //    }
+                            //    else
+                            //    {
+                            //        Debug.Log("이미 Combat 데이터가 존재합니다.");
+                            //    }
+
+                            //    Debug.Log($"Second callback.FlattenRows()[0] : {flattenRows.ToJson()}");
+
+                            //    if (firstRow != null)
+                            //    {
+                            //        LevelStatData = new PlayerLevelStatData(firstRow);
+                            //    }
+                            //    else
+                            //    {
+                            //        LevelStatData = new PlayerLevelStatData(); // PlayerLevelStatData테이블의 row가 비어있을경우.
+                            //    }
+                            //}
+                            //else
+                            //{
+                            //    Debug.Log($"!flattenRows[0].ContainsKey(Combat)에 진입하지 못했습니다.");
+                            //}
+
+                            //if (flattenRows != null && flattenRows.Count > 0 && flattenRows[0] != null)
+                            //{
+                            //    if (!flattenRows[0].ContainsKey("Combat"))
+                            //    {
+                            //        Debug.Log($"flattenRows[0].ContainsKey(Combat)가 존재하지 않습니다.");
+                            //        Param param = new Param();
+
+                            //        //Debug.Log($"LevelStatData.Combat : {LevelStatData.Combat}");
+                            //        param.Add("Combat", LevelStatData.Combat);
+                            //    }
+                            //    else
+                            //    {
+                            //        Debug.Log("이미 Combat데이터가 존재합니다.");
+                            //    }
+
+                            //    Debug.Log($"Second callback.FlattenRows()[0] : {flattenRows.ToJson()}");
+
+                            //    if (callback.FlattenRows()[0] != null)
+                            //    {
+                            //        LevelStatData = new PlayerLevelStatData(callback.FlattenRows()[0]); // 이 부분이구나.
+                            //    }
+                            //    else
+                            //    {
+                            //        LevelStatData = new PlayerLevelStatData(); // PlayerLevelStatData테이블의 row가 비어있을경우.
+                            //    }
+                            //}
+                            //else
+                            //{
+                            //    Debug.Log($"!flattenRows[0].ContainsKey(Combat)에 진입하지 못했습니다.");
+                            //}
+                            //LevelStatData = new PlayerLevelStatData(callback.FlattenRows()[0]);
+
+                            //Debug.Log(
+                            //    $"{SaveManager.Instance.LevelStatData.CurLv} {SaveManager.Instance.LevelStatData.CurEXP}" +
+                            //    $"{SaveManager.Instance.LevelStatData.SP} {SaveManager.Instance.LevelStatData.Dmg} {SaveManager.Instance.LevelStatData.Dex}" +
+                            //    $"{SaveManager.Instance.LevelStatData.MDef} {SaveManager.Instance.LevelStatData.HP} ");
+                            Debug.Log("모든 스텟데이터 불러오기 성공");
                             call();
                         }
                         catch (Exception e)
@@ -1103,13 +1378,14 @@ namespace gunggme
             {
                 if (!callback.IsSuccess())
                 {
-                    Debug.LogError("불러오기 실패");
+                    Debug.LogError("스텟 데이터 불러오기 실패");
                     FindObjectOfType<LoginManager>().LoginFailed();
                     return;
                 }
 
                 if (callback.HasFirstKey())
                 {
+                    Debug.Log($"HasFirstKey NON Action() : {callback.HasFirstKey()}");
                     GetLevelStatData(callback.FirstKeystring(), call);
                 }
                 else
@@ -1118,11 +1394,12 @@ namespace gunggme
                     try
                     {
                         LevelStatData = new PlayerLevelStatData(callback.FlattenRows()[0]);
+                        
                         Debug.Log(
                             $"{SaveManager.Instance.LevelStatData.CurLv} {SaveManager.Instance.LevelStatData.CurEXP}" +
                             $"{SaveManager.Instance.LevelStatData.SP} {SaveManager.Instance.LevelStatData.Dmg} {SaveManager.Instance.LevelStatData.Dex}" +
                             $"{SaveManager.Instance.LevelStatData.MDef} {SaveManager.Instance.LevelStatData.HP} ");
-                        Debug.Log("불러오기 성공");
+                        Debug.Log("스텟 데이터 불러오기 성공");
                         call();
                     }
                     catch (Exception e)
@@ -1157,7 +1434,7 @@ namespace gunggme
                             StageCoupon = new StageCouponData(callback.FlattenRows()[0]);
                             _stageData = callback.GetInDate();
                             call();
-                            Debug.Log("스테이지 쿠폰 데이터 불러오기 성공");
+                            Debug.Log($"GetStageCoupon 1 스테이지 쿠폰 데이터 불러오기 성공");
                         }
                         catch (Exception e)
                         {
@@ -1187,7 +1464,7 @@ namespace gunggme
 
                     try
                     {
-                        Debug.Log("스테이지 쿠폰 데이터 불러오기 성공");
+                        Debug.Log("GetStageCoupon 2 스테이지 쿠폰 데이터 불러오기 성공");
                         StageCoupon = new StageCouponData(callback.FlattenRows()[0]);
                         _stageData = callback.GetInDate();
                         call();
@@ -1224,7 +1501,7 @@ namespace gunggme
                         {
                             SkillData = new SkillData(callback.FlattenRows()[0]);
                             call();
-                            Debug.Log("스킬 데이터 불러오기 성공");
+                            Debug.Log("GetSkillData 1 스킬 데이터 불러오기 성공");
                         }
                         catch (Exception e)
                         {
@@ -1255,7 +1532,7 @@ namespace gunggme
                     {
                         SkillData = new SkillData(callback.FlattenRows()[0]);
                         call();
-                        Debug.Log("스킬 데이터 불러오기 성공");
+                        Debug.Log("GetSkillData 2 스킬 데이터 불러오기 성공");
                     }
                     catch (Exception e)
                     {
@@ -1304,7 +1581,7 @@ namespace gunggme
                         call?.Invoke();
                     }
                 });
-            }
+         }
         
         public void GetUserInfoTest(Action call = null)
         {
