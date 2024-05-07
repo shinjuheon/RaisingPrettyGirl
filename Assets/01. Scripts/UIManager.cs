@@ -24,6 +24,10 @@ namespace gunggme
         [SerializeField] private TMP_Text[] _statTexts;
         private PlayerStat _playerStat;
 
+        [Header("Combat")]
+        [SerializeField] GameObject oneToOne;
+        [SerializeField] TextMeshProUGUI oneToOneText;
+
         [Header("Hp")]
         [SerializeField] private Damageable _playerDamageable;
         [SerializeField] private Slider _hpSlider;
@@ -268,6 +272,13 @@ namespace gunggme
         {
             GameObject.Find("Player").GetComponent<PlayerSkinSystem>().ChangeSkin(_skinPreview.curRarity, _skinPreview.curSkinIdx);
             _skinPreview.transform.parent.gameObject.SetActive(false);
+        }
+
+        public void OneToOneBtn()
+        {
+            oneToOne.SetActive(true);
+            _playerStat.UpdateCombat();
+            oneToOneText.text = _playerStat.Combat.ToString();
         }
     }
 }
