@@ -100,21 +100,33 @@ namespace gunggme
 
         private void Start()
         {
-            Debug.Log($"{SaveManager.Instance.LevelStatData.CurLv} {SaveManager.Instance.LevelStatData.CurEXP}" +
-                      $"{SaveManager.Instance.LevelStatData.SP} {SaveManager.Instance.LevelStatData.Dmg} {SaveManager.Instance.LevelStatData.Dex}"+
-                $"{ SaveManager.Instance.LevelStatData.MDef} {SaveManager.Instance.LevelStatData.HP} ");
+            Debug.Log($"SaveManager.Instance.LevelStatData.CurLv : {SaveManager.Instance.LevelStatData.CurLv}");
+            Debug.Log($"SaveManager.Instance.LevelStatData.CurEXP : {SaveManager.Instance.LevelStatData.CurEXP}");
+            Debug.Log($"SaveManager.Instance.LevelStatData.SP : {SaveManager.Instance.LevelStatData.SP}");
+            Debug.Log($"SaveManager.Instance.LevelStatData.Dmg : {SaveManager.Instance.LevelStatData.Dmg}");
+            Debug.Log($"SaveManager.Instance.LevelStatData.Dex : {SaveManager.Instance.LevelStatData.Dex}");
+            Debug.Log($"SaveManager.Instance.LevelStatData.MDef : {SaveManager.Instance.LevelStatData.MDef}");
+            Debug.Log($"SaveManager.Instance.LevelStatData.HP : {SaveManager.Instance.LevelStatData.HP}");
+
             LoadData(SaveManager.Instance.LevelStatData.CurLv, SaveManager.Instance.LevelStatData.CurEXP,
                 SaveManager.Instance.LevelStatData.SP, SaveManager.Instance.LevelStatData.Dmg,
                 SaveManager.Instance.LevelStatData.Dex, SaveManager.Instance.LevelStatData.MDef,
                 SaveManager.Instance.LevelStatData.HP);
-            Combat = Dex + MagicDef + Hp + Dmg;
+
+            Debug.Log("PlayerStatLoadData 완료");
+            
             _player.SetHP();
+            Debug.Log("_player.SetHP();");
             UpLevel(0);
+            Debug.Log("UpLevel(0);");
+
         }
 
-        public void UpdateCombat()
+        public int UpdateCombat()
         {
             Combat = Dex + MagicDef + Hp + Dmg;
+
+            return Combat;
         }
 
         public bool UpLevel(float exp)
