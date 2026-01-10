@@ -1,9 +1,15 @@
 apply plugin: 'com.android.library'
 **APPLY_PLUGINS**
 
+repositories {
+    maven { url 'https://repo.onestore.co.kr/repository/onestore-sdk-public' }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "com.google.android.gms:play-services-games-v2:+"
+    implementation "com.onestorecorp.sdk:sdk-iap:21.04.00"
+    implementation "com.onestorecorp.sdk:sdk-licensing:2.2.1"
 **DEPS**}
 
 android {

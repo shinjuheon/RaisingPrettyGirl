@@ -3,6 +3,8 @@
     <package>com.google.android.play:app-update:2.0.0</package>
     <package>com.google.android.play:core-common:2.0.0</package>
     <package>com.google.games:gpgs-plugin-support:0.11.01</package>
+    <package>com.onestorecorp.sdk:sdk-iap:21.04.00</package>
+    <package>com.onestorecorp.sdk:sdk-licensing:2.2.1</package>
   </packages>
   <files>
     <file>Assets/Plugins/Android/androidx.annotation.annotation-1.1.0.jar</file>
@@ -41,14 +43,18 @@
     <file>Assets/Plugins/Android/com.google.android.play.app-update-2.0.0.aar</file>
     <file>Assets/Plugins/Android/com.google.android.play.core-common-2.0.0.aar</file>
     <file>Assets/Plugins/Android/com.google.games.gpgs-plugin-support-0.11.01.aar</file>
+    <file>Assets/Plugins/Android/com.onestorecorp.sdk.sdk-auth-1.2.2.aar</file>
+    <file>Assets/Plugins/Android/com.onestorecorp.sdk.sdk-base-1.2.2.aar</file>
+    <file>Assets/Plugins/Android/com.onestorecorp.sdk.sdk-iap-21.04.00.aar</file>
+    <file>Assets/Plugins/Android/com.onestorecorp.sdk.sdk-licensing-2.2.1.aar</file>
   </files>
   <settings>
     <setting name="androidAbis" value="arm64-v8a,armeabi-v7a" />
     <setting name="bundleId" value="com.friendtok.RaisingPrettyGirl" />
     <setting name="explodeAars" value="True" />
     <setting name="gradleBuildEnabled" value="True" />
-    <setting name="gradlePropertiesTemplateEnabled" value="False" />
-    <setting name="gradleTemplateEnabled" value="False" />
+    <setting name="gradlePropertiesTemplateEnabled" value="True" />
+    <setting name="gradleTemplateEnabled" value="True" />
     <setting name="installAndroidPackages" value="True" />
     <setting name="localMavenRepoDir" value="Assets/GeneratedLocalRepo" />
     <setting name="packageDir" value="Assets/Plugins/Android" />
