@@ -1,24 +1,34 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using BackEnd;
-using GooglePlayGames;
-using GooglePlayGames.BasicApi;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using TMPro;
 
 namespace gunggme
 {
     public class LoginManager : MonoBehaviour
     {
+        [Header("UI References")]
         [SerializeField] private GameObject _loginFailedText;
         [SerializeField] private GameObject _loging;
         [SerializeField] private PolicyUI _policyUI;
         [SerializeField] private GameObject _maintenceUI;
         [SerializeField] private GameObject gameQuitUI;
         [SerializeField] private GameObject blockIDUI;
-        [SerializeField] private GameObject googleLoginobj;
-        private string resultCode;
+
+        [Header("로그인 패널")]
+        [SerializeField] private GameObject _loginPanel;
+        [SerializeField] private TMP_InputField _idInputField;
+        [SerializeField] private TMP_InputField _passwordInputField;
+        [SerializeField] private TMP_Text _loginErrorText;
+
+        [Header("회원가입 패널")]
+        [SerializeField] private GameObject _signUpPanel;
+        [SerializeField] private TMP_InputField _signUpIdInputField;
+        [SerializeField] private TMP_InputField _signUpPasswordInputField;
+        [SerializeField] private TMP_InputField _signUpPasswordConfirmInputField;
+        [SerializeField] private TMP_Text _signUpErrorText;
 
         private Coroutine _coroutine;
 
@@ -27,194 +37,371 @@ namespace gunggme
             Backend.AsyncPoll();
         }
 
-        public void Login_Google()
+        /// <summary>
+        /// 로그인 버튼 클릭 시 호출
+        /// </summary>
+        public void OnLoginButtonClicked()
         {
-            if (_maintenceUI.activeSelf) return;
-            if (_loging.activeSelf) return;
-            _loging.SetActive(true);
+            Debug.Log("[LOGIN] 로그인 버튼 클릭됨");
 
-#if UNITY_ANDROID
-            PlayGamesPlatform.Instance.Authenticate(ProcessAuthentication);
-#endif
+            if (_maintenceUI.activeSelf)
+            {
+                Debug.Log("[LOGIN] 점검중이라 로그인 스킵");
+                return;
+            }
+            if (_loging.activeSelf)
+            {
+                Debug.Log("[LOGIN] 이미 로그인 중이라 스킵");
+                return;
+            }
+
+            string id = _idInputField.text.Trim();
+            string password = _passwordInputField.text;
+
+            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(password))
+            {
+                ShowLoginError("아이디와 비밀번호를 입력해주세요.");
+                return;
+            }
+
+            if (id.Length < 4 || password.Length < 6)
+            {
+                ShowLoginError("아이디는 4자 이상, 비밀번호는 6자 이상이어야 합니다.");
+                return;
+            }
+
+            _loging.SetActive(true);
+            HideAllErrors();
+
+            CustomLogin(id, password);
         }
 
+        /// <summary>
+        /// 회원가입 화면으로 이동 버튼
+        /// </summary>
+        public void OnGoToSignUpClicked()
+        {
+            Debug.Log("[LOGIN] 회원가입 화면으로 이동");
+            _loginPanel.SetActive(false);
+            _signUpPanel.SetActive(true);
+            HideAllErrors();
+            ClearSignUpInputs();
+        }
+
+        /// <summary>
+        /// 로그인 화면으로 돌아가기 버튼
+        /// </summary>
+        public void OnBackToLoginClicked()
+        {
+            Debug.Log("[LOGIN] 로그인 화면으로 돌아가기");
+            _signUpPanel.SetActive(false);
+            _loginPanel.SetActive(true);
+            HideAllErrors();
+        }
+
+        /// <summary>
+        /// 회원가입 실행 버튼 클릭 시 호출
+        /// </summary>
+        public void OnSignUpButtonClicked()
+        {
+            Debug.Log("[LOGIN] 회원가입 버튼 클릭됨");
+
+            if (_maintenceUI.activeSelf)
+            {
+                Debug.Log("[LOGIN] 점검중이라 회원가입 스킵");
+                return;
+            }
+            if (_loging.activeSelf)
+            {
+                Debug.Log("[LOGIN] 이미 로딩 중이라 스킵");
+                return;
+            }
+
+            string id = _signUpIdInputField.text.Trim();
+            string password = _signUpPasswordInputField.text;
+            string passwordConfirm = _signUpPasswordConfirmInputField.text;
+
+            if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(password))
+            {
+                ShowSignUpError("아이디와 비밀번호를 입력해주세요.");
+                return;
+            }
+
+            if (id.Length < 4)
+            {
+                ShowSignUpError("아이디는 4자 이상이어야 합니다.");
+                return;
+            }
+
+            if (password.Length < 6)
+            {
+                ShowSignUpError("비밀번호는 6자 이상이어야 합니다.");
+                return;
+            }
+
+            if (password != passwordConfirm)
+            {
+                ShowSignUpError("비밀번호가 일치하지 않습니다.");
+                return;
+            }
+
+            _loging.SetActive(true);
+            HideAllErrors();
+
+            CustomSignUp(id, password);
+        }
+
+        private void ClearSignUpInputs()
+        {
+            if (_signUpIdInputField != null) _signUpIdInputField.text = "";
+            if (_signUpPasswordInputField != null) _signUpPasswordInputField.text = "";
+            if (_signUpPasswordConfirmInputField != null) _signUpPasswordConfirmInputField.text = "";
+        }
+
+        /// <summary>
+        /// 뒤끝 커스텀 로그인
+        /// </summary>
+        private void CustomLogin(string id, string password)
+        {
+            Debug.Log($"[LOGIN] CustomLogin 시도 - ID: {id}");
+
+            Backend.BMember.CustomLogin(id, password, callback =>
+            {
+                Debug.Log($"[LOGIN] CustomLogin 결과: {callback}");
+
+                if (callback == null)
+                {
+                    Debug.LogError("[LOGIN] CustomLogin callback이 null!");
+                    _loging.SetActive(false);
+                    ShowLoginError("서버 연결에 실패했습니다.");
+                    return;
+                }
+
+                string statusCode = callback.GetStatusCode();
+                string errorCode = callback.GetErrorCode();
+                string message = callback.GetMessage();
+                Debug.Log($"[LOGIN] CustomLogin - StatusCode: {statusCode}, ErrorCode: {errorCode}, Message: {message}");
+
+                if (callback.IsSuccess())
+                {
+                    Debug.Log("[LOGIN] 로그인 성공!");
+                    OnLoginSuccess();
+                }
+                else
+                {
+                    _loging.SetActive(false);
+                    HandleLoginError(statusCode, errorCode, message);
+                }
+            });
+        }
+
+        /// <summary>
+        /// 뒤끝 커스텀 회원가입
+        /// </summary>
+        private void CustomSignUp(string id, string password)
+        {
+            Debug.Log($"[LOGIN] CustomSignUp 시도 - ID: {id}");
+
+            Backend.BMember.CustomSignUp(id, password, callback =>
+            {
+                Debug.Log($"[LOGIN] CustomSignUp 결과: {callback}");
+
+                if (callback == null)
+                {
+                    Debug.LogError("[LOGIN] CustomSignUp callback이 null!");
+                    _loging.SetActive(false);
+                    ShowSignUpError("서버 연결에 실패했습니다.");
+                    return;
+                }
+
+                string statusCode = callback.GetStatusCode();
+                string errorCode = callback.GetErrorCode();
+                string message = callback.GetMessage();
+                Debug.Log($"[LOGIN] CustomSignUp - StatusCode: {statusCode}, ErrorCode: {errorCode}, Message: {message}");
+
+                if (callback.IsSuccess())
+                {
+                    Debug.Log("[LOGIN] 회원가입 성공! 초기 데이터 생성");
+                    OnSignUpSuccess();
+                }
+                else
+                {
+                    _loging.SetActive(false);
+                    HandleSignUpError(statusCode, errorCode, message);
+                }
+            });
+        }
+
+        /// <summary>
+        /// 로그인 성공 처리
+        /// </summary>
+        private void OnLoginSuccess()
+        {
+            try
+            {
+                Backend.BMember.RefreshTheBackendToken();
+                Debug.Log("[LOGIN] RefreshTheBackendToken 완료, LoadData 시작");
+                StartCoroutine(SaveManager.Instance.LoadData("InGame"));
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[LOGIN] LoadData 예외: {e.Message}\n{e.StackTrace}");
+                _loging.SetActive(false);
+                ShowLoginError("데이터 로드에 실패했습니다.");
+            }
+        }
+
+        /// <summary>
+        /// 회원가입 성공 처리
+        /// </summary>
+        private void OnSignUpSuccess()
+        {
+            try
+            {
+                Debug.Log("[LOGIN] 신규 유저 - InitData_NonMove 시작");
+                SaveManager.Instance.InitData_NonMove();
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[LOGIN] InitData_NonMove 예외: {e.Message}\n{e.StackTrace}");
+                _loging.SetActive(false);
+                ShowSignUpError("초기 데이터 생성에 실패했습니다.");
+            }
+        }
+
+        /// <summary>
+        /// 로그인 에러 처리
+        /// </summary>
+        private void HandleLoginError(string statusCode, string errorCode, string message)
+        {
+            Debug.LogError($"[LOGIN] 로그인 실패 - StatusCode: {statusCode}, ErrorCode: {errorCode}");
+
+            switch (statusCode)
+            {
+                case "401":
+                    ShowLoginError("아이디 또는 비밀번호가 잘못되었습니다.");
+                    break;
+                case "403":
+                    Debug.LogError("[LOGIN] 403 에러 - 차단된 계정");
+                    StartCoroutine(BlcokIDGameQuit());
+                    break;
+                case "404":
+                    ShowLoginError("존재하지 않는 아이디입니다.");
+                    break;
+                default:
+                    if (message != null && message.Contains("maintenance"))
+                    {
+                        _maintenceUI.SetActive(true);
+                    }
+                    else
+                    {
+                        ShowLoginError($"로그인 실패: {message}");
+                    }
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 회원가입 에러 처리
+        /// </summary>
+        private void HandleSignUpError(string statusCode, string errorCode, string message)
+        {
+            Debug.LogError($"[LOGIN] 회원가입 실패 - StatusCode: {statusCode}, ErrorCode: {errorCode}");
+
+            switch (statusCode)
+            {
+                case "409":
+                    ShowSignUpError("이미 존재하는 아이디입니다.");
+                    break;
+                case "400":
+                    if (errorCode == "BadParameterException")
+                    {
+                        ShowSignUpError("아이디 또는 비밀번호 형식이 올바르지 않습니다.");
+                    }
+                    else
+                    {
+                        ShowSignUpError($"회원가입 실패: {message}");
+                    }
+                    break;
+                default:
+                    ShowSignUpError($"회원가입 실패: {message}");
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 로그인 에러 메시지 표시
+        /// </summary>
+        private void ShowLoginError(string message)
+        {
+            Debug.LogWarning($"[LOGIN] 로그인 에러: {message}");
+            if (_loginErrorText != null)
+            {
+                _loginErrorText.text = message;
+                _loginErrorText.gameObject.SetActive(true);
+            }
+        }
+
+        /// <summary>
+        /// 회원가입 에러 메시지 표시
+        /// </summary>
+        private void ShowSignUpError(string message)
+        {
+            Debug.LogWarning($"[LOGIN] 회원가입 에러: {message}");
+            if (_signUpErrorText != null)
+            {
+                _signUpErrorText.text = message;
+                _signUpErrorText.gameObject.SetActive(true);
+            }
+        }
+
+        /// <summary>
+        /// 모든 에러 메시지 숨김
+        /// </summary>
+        private void HideAllErrors()
+        {
+            if (_loginErrorText != null)
+                _loginErrorText.gameObject.SetActive(false);
+            if (_signUpErrorText != null)
+                _signUpErrorText.gameObject.SetActive(false);
+        }
+
+        /// <summary>
+        /// 씬 이동 (자동 로그인용)
+        /// </summary>
         public void MoveScene()
         {
-            if (_maintenceUI.activeSelf) return;
-            if (_loging.activeSelf) return;
+            Debug.Log("[LOGIN] MoveScene 호출됨");
+            if (_maintenceUI.activeSelf)
+            {
+                Debug.Log("[LOGIN] 점검중이라 MoveScene 스킵");
+                return;
+            }
+            if (_loging.activeSelf)
+            {
+                Debug.Log("[LOGIN] 이미 로딩중이라 MoveScene 스킵");
+                return;
+            }
             _loging.SetActive(true);
+            Debug.Log("[LOGIN] LoadData 코루틴 시작");
             StartCoroutine(SaveManager.Instance.LoadData("InGame"));
-        }
-
-
-        void ProcessAuthentication(SignInStatus status)
-        {
-            if (status == SignInStatus.Success)
-            {
-                GetAccessCode();
-                Debug.Log("로그인 성공");
-                // Continue with Play Games Services
-            }
-            else
-            {
-                LoginFailed();
-#if UNITY_ANDROID
-                PlayGamesPlatform.Instance.ManuallyAuthenticate(ProcessAuthentication);
-#endif
-            }
         }
 
         public void LoginFailed()
         {
+            Debug.LogWarning("[LOGIN] LoginFailed 호출됨");
             if (_coroutine != null)
             {
                 StopCoroutine(_coroutine);
             }
             if (_policyUI.gameObject.activeSelf) _policyUI.gameObject.SetActive(false);
             _loging.SetActive(false);
-            // 로그인이 실패할때의 예외처리 필요.
-            StartCoroutine(LoginFailAndGameQuit()); // 추가 : 로그인실패 택스트를 띄우고 2.5초뒤 게임을 종료
+            StartCoroutine(LoginFailAndGameQuit());
         }
-        // TODO : 401 예외처리 (토큰만료 되었을 경우, 인증이 실패했을 경우 등등)
-        public void GetAccessCode()
-        {
-#if UNITY_ANDROID
-            PlayGamesPlatform.Instance.RequestServerSideAccess( // false = 액세스 토큰을 새로 고치지 않고, 만료되었을 경우에만 기존 토큰을 사용
-                /* forceRefreshToken= */ false,
-                code =>
-                {
-                    Debug.Log("구글 인증 코드 : " + code);
-
-                    Backend.BMember.GetGPGS2AccessToken(code, googleCallback => // code = 구글인증코드, googleCallback = 구글 액세스 토큰
-                    {
-                        Debug.Log("GetGPGS2AccessToken 함수 호출 결과 " + googleCallback);
-                        //&& googleCallback = 만료되었을 경우의 검사항목을 추가해줘야 한다.
-                        if (googleCallback == null)
-                        {  // 구글 액세스 토큰을 받아오지 못하는경우
-                            Debug.LogError("GoogleCallback is null");
-                            // Handle null case appropriately
-                            StartCoroutine(LoginFailAndGameQuit()); // 추가 : 로그인실패 택스트를 띄우고 2.5초뒤 게임을 종료
-                            // 현재까지의 과정에서는 구글의 인증코드만을 받았고 구글의 액세스 토큰을 얻어오지 못했기때문에,
-                            // 게임을 종료해 구글 액세스 토큰을 얻는 과정을 다시 한번 실행해준다.
-                            // TitleSceneLoginScript클래스의 Update()함수에서는 백엔드의 액세스 토큰을 검사하기 떄문에
-                            // 게임을 종료하고 다시 실행한다면 로그인창 오브젝트가 활성화되고 다시 GetAccessCode()함수를 실행한다.
-                            return;
-                        }
-
-                        string accessToken = "";
-                        if (googleCallback.IsSuccess()) // 구글 액세스 토큰을 얻는 것에 성공했다면
-                        {
-                            var jsonResult = googleCallback.GetReturnValuetoJSON();
-                            if (jsonResult != null && jsonResult.ContainsKey("access_token"))
-                            {
-                                accessToken = jsonResult["access_token"].ToString();
-                            }
-                        }
-
-                        Backend.BMember.AuthorizeFederation(accessToken, FederationType.GPGS2, callback =>
-                        { // callback = 뒤끝 백엔드의 액세스 토큰
-                            Debug.Log("뒤끝 로그인 성공했습니다." + callback);
-                            try
-                            {
-                                Backend.BMember.RefreshTheBackendToken(); // 뒤끝 토큰 갱신
-                                // 로그인 이후 24시간이 지날 경우에는 Backend.BMember.RefreshTheBackendToken을 호출하면 해결하실 수 있습니다.
-                                _loging.SetActive(true);
-
-                                if (callback == null)
-                                {
-                                    Debug.LogError("Callback is null");
-                                    // Handle null case appropriately
-                                    // callback이 null일경우의 예외처리 필요
-                                    StartCoroutine(ForceQuitGame());
-                                    return;
-                                }
-
-                                string statusCode = callback.GetStatusCode();
-                                Debug.Log("statusCodeNum = "+ statusCode);
-                                if (statusCode == "200") // 기존 액세스 토큰으로 로그인한 경우
-                                {
-                                    try
-                                    {
-                                        StartCoroutine(SaveManager.Instance.LoadData("InGame"));
-                                        // LoadData GetUserInfo를 통해서 유저의 정보를 가져오고 InGame씬으로 이동한다. (자동로그인)
-                                    }
-                                    catch (Exception e) // 예외가 발생한다면
-                                    {
-                                        Debug.LogError(e);
-                                        Debug.Log("데이터가 없음");
-                                        StartCoroutine(ForceQuitGame());
-                                        //_policyUI.OpenUI();
-                                    }
-                                }
-                                else if (statusCode == "201") // 신규 회원 가입에 성공한 경우
-                                {
-                                    //_policyUI.OpenUI(); // 게임 규정인듯한데 실행이 안됨 이상함 -> 정상실행이 되었을 경우 Accept -> InitData()함수 실행
-                                    // 뒤끝의 유저정보를 얻어온 후 NameSet씬으로 이동 -> ID생성
-                                    SaveManager.Instance.InitData_NonMove(); // 뒤끝의 유저정보를 얻어온 후 NameSet씬으로 이동 -> ID생성
-                                    // 규정이 정상적으로 생긴다면  SaveManager.Instance.InitData_NonMove();이 코드는 필요없음
-                                }
-                                else if (statusCode == "400") // 추가 - 기기 로컬에 액세스 토큰이 존재하지 않는데 토큰 로그인 시도를 한 경우(디바이스 정보가 null일경우)
-                                {
-                                    Backend.BMember.Logout();
-                                    googleLoginobj.SetActive(true);
-                                    // 백엔드의 액세스토큰을 삭제하고 새롭게 구글로그인창으로
-                                    // 구글액세스코인와 백엔드 토큰을 얻는다.
-                                    //_policyUI.OpenUI();//
-                                   // StartCoroutine(ForceQuitGame());
-                                }
-                                else if (statusCode == "401") // 다른 기기로 로그인하여 refresh_token이 만료된 경우, 
-                                {
-                                    Backend.BMember.Logout();
-                                    googleLoginobj.SetActive(true);
-                                    // 백엔드의 액세스토큰을 삭제하고 새롭게 구글로그인창으로
-                                    // 구글액세스코인와 백엔드 토큰을 얻는다.
-
-                                    //if (callback)
-                                    //{
-                                    // 구글 엑세스 토큰을 검사해야하나 ?
-                                    //}
-                                    // 다른 기기에서 로그인을 한 경우, 커스텀 로그인 혹은 페데레이션 로그인 등 직접 로그인을 통해 액세스토큰을 재발급하셔야 합니다.
-
-                                    //_policyUI.OpenUI();
-                                    //StartCoroutine(ForceQuitGame());
-                                }
-                                else if (statusCode == "403") // 차단당한 계정 또는 디바이스 일 경우
-                                {
-                                    Debug.Log("해당 계정은 차단당한 계정입니다.");
-                                    StartCoroutine(BlcokIDGameQuit());
-                                    // 블록ID라는 Text를 띄우고 게임종료
-                                }
-                                else if (callback.IsMaintenanceError())
-                                {
-                                    LoginFailed();
-                                    _maintenceUI.SetActive(true);
-                                }
-                            }
-                            catch (Exception e)
-                            {// 뒤끝서버에 로그인하지 못하는경우
-                                StartCoroutine(ForceQuitGame());
-                                Debug.LogError(e);
-                            }
-                        });
-                    });
-                });
-#endif
-        }
-
-        //IEnumerator GetUserInfo()
-        //{
-        //    bool isHaveName = false;
-        //    SaveManager.Instance.GetUserInfoTest(() =>
-        //    {
-        //        _policyUI.OpenUI();
-        //        isHaveName = true;
-        //        return;
-        //    });
-        //    yield return new WaitUntil(() => isHaveName);
-        //}
 
         public IEnumerator ForceQuitGame()
         {
+            Debug.LogError("[LOGIN] ForceQuitGame - 강제 종료 시작");
             gameQuitUI.SetActive(true);
             yield return new WaitForSeconds(2.5f);
             Application.Quit();
@@ -222,6 +409,7 @@ namespace gunggme
 
         IEnumerator LoginFailAndGameQuit()
         {
+            Debug.LogError("[LOGIN] LoginFailAndGameQuit - 로그인 실패로 종료");
             _loginFailedText.gameObject.SetActive(true);
             yield return new WaitForSeconds(2.5f);
             Application.Quit();
@@ -229,10 +417,10 @@ namespace gunggme
 
         IEnumerator BlcokIDGameQuit()
         {
+            Debug.LogError("[LOGIN] BlcokIDGameQuit - 차단된 계정으로 종료");
             blockIDUI.SetActive(true);
             yield return new WaitForSeconds(2.5f);
             Application.Quit();
         }
     }
-    
 }

@@ -11,11 +11,14 @@ namespace gunggme
     public class ShopItemPannel : MonoBehaviour
     {
         [SerializeField] private ShopItem _shopItem;
-        
+
         [SerializeField] private Image _itemImage;
         [SerializeField] private TMP_Text _itemName;
         [SerializeField] private TMP_Text _itemPriceText;
         [SerializeField] private TMP_Text _information;
+
+        [Header("실제 결제용 (다이아몬드 상점)")]
+        [SerializeField] private RealMoney _realMoney;
 
         private GoodsManager _goodsManager;
         private PlayerStat _playerStat;
@@ -62,7 +65,18 @@ namespace gunggme
                     }
                     break;
                 case GoodsType.Money:
-                    break;
+                    // 실제 결제 (OneStore)
+                    if (_realMoney != null)
+                    {
+                        _realMoney.Purchase(_shopItem);
+                        gameObject.SetActive(false);
+                        return; // 결제 완료 콜백에서 ApplyReward 호출됨
+                    }
+                    else
+                    {
+                        Debug.LogError("[ShopItemPannel] RealMoney가 연결되지 않았습니다.");
+                        return;
+                    }
             }
             Debug.Log("구매완료");
             _shopItem.ApplyReward();

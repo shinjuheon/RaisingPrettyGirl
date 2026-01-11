@@ -780,6 +780,14 @@ namespace gunggme
         {
             int saveNum = 0;
             FindComponents();
+
+            // 앱 종료 시 GameObject가 이미 파괴된 경우 저장 스킵
+            if (_playerStat == null || _inventory == null || _goodsManager == null)
+            {
+                Debug.Log("컴포넌트가 파괴되어 저장을 스킵합니다.");
+                return;
+            }
+
             Debug.Log("저장 시작");
             _playerStat.UpdateCombat();
             ItemSaveData.SetItem(_inventory);
@@ -1618,16 +1626,26 @@ namespace gunggme
             //
             private void FindComponents()
             {
-                _codeSystem = GameObject.Find("CodeSystem").GetComponent<CodeSystem>();
-                _uiManager = GameObject.Find("UIManager").GetComponent<UIManager>();
-                _goodsManager = GameObject.Find("GoodsManager").GetComponent<GoodsManager>();
-                _inventory = GameObject.Find("Inventory").GetComponent<Inventory>();
-                _playerEquipment = GameObject.Find("Player").GetComponent<PlayerEquipment>();
-                _playerStat = GameObject.Find("Player").GetComponent<PlayerStat>();
-                _playerSkinSystem = GameObject.Find("Player").GetComponent<PlayerSkinSystem>();
-                _petSystem = GameObject.Find("Player").GetComponent<PetSystem>();
-                _stageManager = GameObject.Find("StageManager").GetComponent<StageManager>();
-                _player = GameObject.Find("Player").GetComponent<Player>();
+                var codeSystemObj = GameObject.Find("CodeSystem");
+                var uiManagerObj = GameObject.Find("UIManager");
+                var goodsManagerObj = GameObject.Find("GoodsManager");
+                var inventoryObj = GameObject.Find("Inventory");
+                var playerObj = GameObject.Find("Player");
+                var stageManagerObj = GameObject.Find("StageManager");
+
+                if (codeSystemObj != null) _codeSystem = codeSystemObj.GetComponent<CodeSystem>();
+                if (uiManagerObj != null) _uiManager = uiManagerObj.GetComponent<UIManager>();
+                if (goodsManagerObj != null) _goodsManager = goodsManagerObj.GetComponent<GoodsManager>();
+                if (inventoryObj != null) _inventory = inventoryObj.GetComponent<Inventory>();
+                if (playerObj != null)
+                {
+                    _playerEquipment = playerObj.GetComponent<PlayerEquipment>();
+                    _playerStat = playerObj.GetComponent<PlayerStat>();
+                    _playerSkinSystem = playerObj.GetComponent<PlayerSkinSystem>();
+                    _petSystem = playerObj.GetComponent<PetSystem>();
+                    _player = playerObj.GetComponent<Player>();
+                }
+                if (stageManagerObj != null) _stageManager = stageManagerObj.GetComponent<StageManager>();
             }
 
             Item GetItemData(int id, int type, int enforce)

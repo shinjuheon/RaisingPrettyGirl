@@ -21,6 +21,29 @@ namespace gunggme
 
         private void Start()
         {
+            if (OneStorePurchaseManager.Instance != null)
+            {
+                // 이미 초기화되었으면 바로 로드
+                if (OneStorePurchaseManager.Instance.IsInitialized)
+                {
+                    OnOneStoreInitialized();
+                }
+                else
+                {
+                    // 초기화 완료 대기
+                    OneStorePurchaseManager.Instance.OnInitialized += OnOneStoreInitialized;
+                }
+            }
+            else
+            {
+                Debug.LogError("[OneStoreInitializer] OneStorePurchaseManager가 없습니다.");
+            }
+        }
+
+        private void OnOneStoreInitialized()
+        {
+            Debug.Log("[OneStoreInitializer] OneStore 초기화 완료됨");
+
             if (_loadOnStart && _productIds.Count > 0)
             {
                 LoadProducts();
@@ -29,6 +52,14 @@ namespace gunggme
             if (_queryPurchasesOnStart)
             {
                 QueryPendingPurchases();
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (OneStorePurchaseManager.Instance != null)
+            {
+                OneStorePurchaseManager.Instance.OnInitialized -= OnOneStoreInitialized;
             }
         }
 
