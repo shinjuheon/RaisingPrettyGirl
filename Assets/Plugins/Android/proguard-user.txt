@@ -24,3 +24,17 @@
 -keep class io.thebackend.unity.** {
     *;
 }
+
+# OneStore SDK - Keep all classes
+-keep class com.gaa.** { *; }
+-keep class com.onestorecorp.** { *; }
+
+# OneStore IAP
+-keep class com.gaa.sdk.iap.** { *; }
+-keep class com.gaa.extern.iap.** { *; }
+
+# OneStore Auth
+-keep class com.gaa.sdk.auth.** { *; }
+
+# OneStore Base
+-keep class com.gaa.sdk.base.** { *; }

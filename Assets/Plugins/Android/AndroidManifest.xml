@@ -13,9 +13,7 @@
         </intent>
     </queries>
     <application>
-        <application>
-            <meta-data android:name="onestore:dev_option" android:value="onestore_00" />
-        </application>
+        <meta-data android:name="onestore:dev_option" android:value="onestore_00" />
         <activity android:name="com.unity3d.player.UnityPlayerActivity"
                   android:theme="@style/UnityThemeSelector">
             <intent-filter>
