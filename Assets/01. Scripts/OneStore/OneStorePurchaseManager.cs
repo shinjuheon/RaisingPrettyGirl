@@ -84,6 +84,11 @@ namespace gunggme
         #region Initialization
 
         /// <summary>
+        /// 초기화 완료 이벤트 (비동기 초기화 완료 시 호출)
+        /// </summary>
+        public event Action OnInitialized;
+
+        /// <summary>
         /// 원스토어 결제 클라이언트 초기화
         /// </summary>
         private void Initialize()
@@ -94,10 +99,88 @@ namespace gunggme
                 return;
             }
 
-            _purchaseClient = new PurchaseClientImpl(_licenseKey);
-            _purchaseClient.Initialize(this);
-            IsInitialized = true;
-            Debug.Log("[OneStore] 초기화 완료");
+#if UNITY_ANDROID && !UNITY_EDITOR
+            try
+            {
+                Debug.Log("[OneStore] 초기화 시작...");
+                _purchaseClient = new PurchaseClientImpl(_licenseKey);
+                _purchaseClient.Initialize(this);
+                // 비동기 초기화 - 연결 완료 확인을 위해 Coroutine 사용
+                StartCoroutine(WaitForConnection());
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"[OneStore] 초기화 예외 발생: {e.Message}\n{e.StackTrace}");
+                IsInitialized = false;
+            }
+#else
+            Debug.Log("[OneStore] Editor에서는 초기화를 건너뜁니다.");
+            IsInitialized = false;
+#endif
+        }
+
+        private System.Collections.IEnumerator WaitForConnection()
+        {
+            Debug.Log("[OneStore] 연결 대기 시작...");
+
+            // 연결 대기 (최대 5초)
+            float timeout = 5f;
+            float elapsed = 0f;
+
+            while (elapsed < timeout)
+            {
+                // 초기화 실패 확인
+                if (_setupFailed)
+                {
+                    Debug.LogError($"[OneStore] 초기화 실패: {_setupFailMessage}");
+                    IsInitialized = false;
+                    yield break;
+                }
+
+                // PurchaseClient가 연결되었는지 확인
+                if (_purchaseClient != null)
+                {
+                    // StoreCode가 있으면 연결 완료
+                    try
+                    {
+                        var storeCode = _purchaseClient.StoreCode;
+                        if (!string.IsNullOrEmpty(storeCode))
+                        {
+                            IsInitialized = true;
+                            Debug.Log($"[OneStore] 초기화 완료 (StoreCode: {storeCode})");
+                            OnInitialized?.Invoke();
+                            yield break;
+                        }
+                    }
+                    catch (System.Exception e)
+                    {
+                        Debug.LogWarning($"[OneStore] StoreCode 확인 중 예외: {e.Message}");
+                    }
+                }
+
+                elapsed += 0.2f;
+                yield return new WaitForSeconds(0.2f);
+                Debug.Log($"[OneStore] 연결 대기 중... ({elapsed:F1}초)");
+            }
+
+            // 타임아웃 - 초기화 실패 여부 재확인
+            if (_setupFailed)
+            {
+                Debug.LogError($"[OneStore] 초기화 실패 (타임아웃): {_setupFailMessage}");
+                IsInitialized = false;
+            }
+            else if (_purchaseClient != null)
+            {
+                // StoreCode가 없어도 PurchaseClient가 있으면 일단 초기화 완료로 처리
+                IsInitialized = true;
+                Debug.Log("[OneStore] 초기화 완료 (타임아웃, StoreCode 없음)");
+                OnInitialized?.Invoke();
+            }
+            else
+            {
+                Debug.LogError("[OneStore] 초기화 실패 - PurchaseClient가 null입니다.");
+                IsInitialized = false;
+            }
         }
 
         /// <summary>
@@ -196,6 +279,8 @@ namespace gunggme
                 return;
             }
 
+            // 보상 지급용으로 저장
+            _pendingPurchase = shopDiamond;
             Purchase(shopDiamond.Diamond_ID, $"diamond_{shopDiamond.Diamonds}");
         }
 
@@ -215,8 +300,84 @@ namespace gunggme
                 return;
             }
 
-            Debug.Log($"[OneStore] 소비 요청: {purchase.ProductId}");
+            // 재시도를 위해 저장
+            if (!_pendingConsumePurchases.ContainsKey(purchase.ProductId))
+            {
+                _pendingConsumePurchases[purchase.ProductId] = purchase;
+                _consumeRetryCount[purchase.ProductId] = 0;
+            }
+
+            Debug.Log($"[OneStore] 소비 요청: {purchase.ProductId} (시도 횟수: {_consumeRetryCount[purchase.ProductId] + 1}/{MAX_CONSUME_RETRY})");
             _purchaseClient.ConsumePurchase(purchase);
+        }
+
+        /// <summary>
+        /// 소비 재시도
+        /// </summary>
+        private void RetryConsumePurchase(string productId)
+        {
+            if (!_pendingConsumePurchases.TryGetValue(productId, out var purchase))
+            {
+                Debug.LogError($"[OneStore] 재시도할 구매 데이터를 찾을 수 없음: {productId}");
+                return;
+            }
+
+            if (!_consumeRetryCount.ContainsKey(productId))
+            {
+                _consumeRetryCount[productId] = 0;
+            }
+
+            _consumeRetryCount[productId]++;
+
+            if (_consumeRetryCount[productId] >= MAX_CONSUME_RETRY)
+            {
+                Debug.LogError($"[OneStore] 소비 최대 재시도 횟수 초과: {productId}");
+                // 재시도 정보 정리
+                _pendingConsumePurchases.Remove(productId);
+                _consumeRetryCount.Remove(productId);
+                OnError?.Invoke($"상품 소비 실패 (최대 재시도 초과): {productId}");
+                return;
+            }
+
+            Debug.Log($"[OneStore] 소비 재시도: {productId} (시도 횟수: {_consumeRetryCount[productId] + 1}/{MAX_CONSUME_RETRY})");
+            StartCoroutine(DelayedConsume(purchase, 1f));
+        }
+
+        private System.Collections.IEnumerator DelayedConsume(PurchaseData purchase, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            if (_purchaseClient != null && IsInitialized)
+            {
+                _purchaseClient.ConsumePurchase(purchase);
+            }
+        }
+
+        /// <summary>
+        /// 미소비 상품 강제 소비 처리 (게임 시작 시 호출)
+        /// </summary>
+        public void ConsumeAllPendingPurchases()
+        {
+            if (!CheckInitialized()) return;
+
+            Debug.Log("[OneStore] 미소비 상품 조회 및 강제 소비 시작...");
+            QueryPurchases();
+        }
+
+        /// <summary>
+        /// 특정 상품 ID로 미소비 상품 강제 소비
+        /// </summary>
+        public void ForceConsumePurchase(string productId)
+        {
+            if (_pendingConsumePurchases.TryGetValue(productId, out var purchase))
+            {
+                Debug.Log($"[OneStore] 강제 소비 시도: {productId}");
+                _consumeRetryCount[productId] = 0; // 재시도 카운트 리셋
+                ConsumePurchase(purchase);
+            }
+            else
+            {
+                Debug.LogWarning($"[OneStore] 강제 소비할 상품이 없음: {productId}");
+            }
         }
 
         /// <summary>
@@ -320,7 +481,9 @@ namespace gunggme
 
         public void OnSetupFailed(IapResult iapResult)
         {
-            Debug.LogError($"[OneStore] 초기화 실패: {iapResult.Message}");
+            Debug.LogError($"[OneStore] OnSetupFailed 호출됨 - Code: {iapResult.Code}, Message: {iapResult.Message}");
+            _setupFailed = true;
+            _setupFailMessage = $"Code: {iapResult.Code}, Message: {iapResult.Message}";
             IsInitialized = false;
             OnError?.Invoke($"초기화 실패: {iapResult.Message}");
         }
@@ -359,18 +522,60 @@ namespace gunggme
         public void OnPurchaseFailed(IapResult iapResult)
         {
             Debug.LogError($"[OneStore] 구매 실패: {iapResult.Message}");
+            _pendingPurchase = null;
             OnPurchaseFail?.Invoke("", iapResult.Message);
         }
 
         public void OnConsumeSucceeded(PurchaseData purchase)
         {
             Debug.Log($"[OneStore] 소비 완료: {purchase.ProductId}");
+
+            // 재시도 정보 정리
+            _pendingConsumePurchases.Remove(purchase.ProductId);
+            _consumeRetryCount.Remove(purchase.ProductId);
+
+            // 직접 보상 지급 (RealMoney가 비활성화되어 있어도 작동)
+            if (_pendingPurchase != null && purchase.ProductId == _pendingPurchase.Diamond_ID)
+            {
+                int diamondAmount = _pendingPurchase.Diamonds;
+                Debug.Log($"[OneStore] 다이아몬드 지급: {diamondAmount}개");
+
+                // 보상 지급
+                _pendingPurchase.ApplyReward();
+
+                // 결제 성공 팝업 표시
+                if (_purchaseSuccessPopup != null)
+                {
+                    _purchaseSuccessPopup.Show(diamondAmount);
+                }
+
+                _pendingPurchase = null;
+            }
+            else
+            {
+                // 미소비 상품 복구 처리 (게임 시작 시 QueryPurchases로 발견된 경우)
+                Debug.Log($"[OneStore] 미소비 상품 소비 완료 (복구 처리): {purchase.ProductId}");
+            }
+
             OnPurchaseComplete?.Invoke(purchase);
         }
 
         public void OnConsumeFailed(IapResult iapResult)
         {
             Debug.LogError($"[OneStore] 소비 실패: {iapResult.Message}");
+
+            // 실패한 상품에 대해 재시도
+            foreach (var kvp in _pendingConsumePurchases)
+            {
+                string productId = kvp.Key;
+                if (_consumeRetryCount.ContainsKey(productId) && _consumeRetryCount[productId] < MAX_CONSUME_RETRY)
+                {
+                    Debug.Log($"[OneStore] 소비 실패로 인한 재시도 예약: {productId}");
+                    RetryConsumePurchase(productId);
+                    break; // 한 번에 하나씩 재시도
+                }
+            }
+
             OnError?.Invoke($"소비 실패: {iapResult.Message}");
         }
 
